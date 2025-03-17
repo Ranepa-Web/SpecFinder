@@ -74,7 +74,7 @@ class Search extends React.Component {
                             />
                         </div>
 
-                        {/* Карточки */}
+                        {/* Карточки резюме */}
                         {filteredItems.map((item) => (
                             <div key={item.id} className="item_card">
                                 <h3>{item.name}</h3>
