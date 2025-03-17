@@ -1,0 +1,38 @@
+{
+
+    "items": [
+        {
+            "id": 1,
+            "name": "Создам Landing Page под ключ",
+            "price": 39900,
+            "rating": 4.9,
+            "isVerify": true,
+            "category": "Веб-разработка"
+        }, 
+        {
+            "id": 2,
+            "name": "Дизайн соц.сетей",
+            "price": 15000,
+            "rating": 4.3,
+            "isVerify": false,
+            "category": "Веб-дизайн"
+        },
+        {
+            "id": 3,
+            "name": "Клининг / Уборка в квартире до 50м2",
+            "price": 7000,
+            "rating": 4.8,
+            "isVerify": true,
+            "category": "Клининг"
+        },
+        {
+            "id": 4,
+            "name": "Натяжные потолки",
+            "price": 66500,
+            "rating": 2.1,
+            "isVerify": false,
+            "category": "Бытовой ремонт"
+        }
+    ]
+
+}

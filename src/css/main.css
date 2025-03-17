@@ -1,0 +1,238 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+
+* {
+    font-family: "Manrope";
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    background-color: #F4F4F4;
+}
+
+.main_banner_background {
+    background-image: url('../images/back_1.png');
+    background-repeat: no-repeat;
+    height: 500px;
+    background-size: cover;
+    margin: 0 auto 30px;
+    max-width: 1440px;
+    border-radius: 18px;
+}
+
+h1 {
+    font-weight: 800;
+    font-size: 48px;
+    line-height: 96%;
+    color: #fff;
+}
+
+.banner_content {
+    display: flex;
+    align-items: center;
+    height: 500px;
+    justify-content: space-between;
+}
+
+.banner_p {
+    padding-top: 20px;
+    padding-bottom: 40px;
+    font-weight: 500;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.text_fifty {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.button_blue_m {
+    padding: 18px 26px;
+    border-radius: 14px;
+    border: none;
+    background-color: #0051FF;
+    cursor: pointer;
+
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    transition: 0.2s;
+}
+
+.button_blue_m:hover {
+    background-color: #003AB7;
+    transition: 0.2s;
+}
+
+.button_white_m {
+    padding: 18px 26px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background-color: transparent;
+    cursor: pointer;
+
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    transition: 0.2s;
+}
+
+.button_white_m:hover {
+    background-color: #fff;
+    color: #000;
+    transition: 0.2s;
+}
+
+.banner_text button {
+    margin-right: 10px;
+}
+
+.banner_text {
+    width: 540px;
+}
+
+header {
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+h4 {
+    font-weight: 800;
+    font-size: 14px;
+    color: #000;
+}
+
+.button_h4 {
+    border: none;
+    background-color: transparent;
+
+    font-weight: 800;
+    font-size: 14px;
+    color: #000;
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.button_h4:hover {
+    color: #003AB7;
+    transition: 0.2s;
+}
+
+.base {
+    background-color: #fff;
+    border-radius: 18px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 20px;
+}
+
+.item_card {
+    background-color: #fff;
+    border-radius: 18px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.button_blue_max {
+    padding: 18px 26px;
+    border-radius: 14px;
+    border: none;
+    background-color: #0051FF;
+    cursor: pointer;
+    width: 100%;
+
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    transition: 0.2s;
+}
+
+.button_blue_max:hover {
+    background-color: #003AB7;
+    transition: 0.2s;
+}
+
+.search_line {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.search_input {
+    padding: 18px 52px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    outline: none;
+    background-color: #fff;
+    flex-grow: 1;
+
+    color: #000;
+    font-size: 14px;
+    font-weight: 500;
+
+    background-image: url('../images/search.svg');
+    background-repeat: no-repeat;
+    background-position: 18px center;
+    background-size: 24px 24px;
+
+    transition: 0.2s;
+}
+
+.search_input:hover {
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    transition: 0.2s;
+}
+
+h3 {
+    font-weight: 800;
+    font-size: 16px;
+}
+
+.blue {
+    padding-top: 3px;
+    color: #0051FF;
+}
+
+.card_tags {
+    display: flex;
+}
+
+.card_tag {
+    background-color: #fff;
+    padding: 8px 14px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 100px;
+    margin-right: 5px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.card_p {
+    font-weight: 500;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.5);
+    padding-bottom: 15px;
+}
+
+.button_gray_m {
+    padding: 18px 26px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    background-color: transparent;
+    cursor: pointer;
+
+    color: #000;
+    font-size: 14px;
+    font-weight: 800;
+    transition: 0.2s;
+}
+
+.button_gray_m:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    transition: 0.2s;
+}
+
+.card_buttons button {
+    margin-right: 5px;
+}
