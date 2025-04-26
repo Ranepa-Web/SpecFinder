@@ -10,9 +10,11 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/react-router-dom": "^5.3.3",
     "bootstrap-4-grid": "^3.4.0",
+    "libphonenumber-js": "^1.12.7",
     "lucide-react": "^0.487.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-imask": "^7.6.1",
     "react-router-dom": "^7.5.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"

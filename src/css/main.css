@@ -270,7 +270,6 @@ p {
   background-color: #e9ecef;
   border: 1px solid #ced4da;
   border-radius: var(--border-radius) 0 0 var(--border-radius);
-  width: 42px;
 }
 
 .dark-mode .input-group-text {
@@ -1317,6 +1316,7 @@ header .container {
 
 .main-content {
   flex: 1;
+  margin: 2rem;
 }
 
 /* Домашняя страница */

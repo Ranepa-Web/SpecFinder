@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { PROFILE_TYPES } from "../constants"
+import PhoneInput from "./inputs/PhoneInput"
+import "../css/inputs/phone_input.css"
 
 function UserProfile({ profileType }) {
   const { currentUser } = useAuth()
@@ -206,18 +208,11 @@ function UserProfile({ profileType }) {
                       readOnly
                     />
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="phone">Телефон</label>
-                    <input
-                      type="tel"
-                      id="phone"
+                  <PhoneInput
                       name="phone"
-                      className="form-control"
-                      placeholder="Добавьте номер телефона"
-                      value={profileData.phone}
+                      phone={profileData.phone}
                       onChange={handleInputChange}
-                    />
-                  </div>
+                  />
                   <div className="form-group">
                     <label htmlFor="city">Город</label>
                     <input
@@ -455,18 +450,11 @@ function UserProfile({ profileType }) {
                       readOnly
                     />
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="phone">Телефон</label>
-                    <input
-                      type="tel"
-                      id="phone"
+                  <PhoneInput
                       name="phone"
-                      className="form-control"
-                      placeholder="Добавьте номер телефона"
-                      value={profileData.phone}
+                      phone={profileData.phone}
                       onChange={handleInputChange}
-                    />
-                  </div>
+                  />
                 </div>
               </div>
 

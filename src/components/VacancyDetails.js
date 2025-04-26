@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams, Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { fetchData, updateData, createData } from "../server/api"
+import PhoneInput from "./inputs/PhoneInput";
 
 const VacancyDetails = () => {
   const { id } = useParams()
@@ -256,19 +257,11 @@ const VacancyDetails = () => {
                     ></textarea>
                   </div>
 
-                  <div className="form-group">
-                    <label htmlFor="contactPhone">Контактный телефон:</label>
-                    <input
-                      type="tel"
-                      id="contactPhone"
+                  <PhoneInput
                       name="contactPhone"
-                      className="form-control"
-                      value={application.contactPhone}
+                      phone={application.contactPhone}
                       onChange={handleInputChange}
-                      placeholder="+7 (___) ___-__-__"
-                      required
-                    />
-                  </div>
+                  />
 
                   <button type="submit" className="button button_blue_m">
                     Отправить отклик
