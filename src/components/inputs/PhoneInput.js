@@ -1,37 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IMaskInput } from 'react-imask';
-import { isValidPhoneNumber } from 'libphonenumber-js';
+import {FiAlertCircle} from "react-icons/fi";
 
 const PhoneInput = ({
                         phone,
                         onChange,
-                        name, // Make name required
+                        name,
                         label = 'Телефон',
                         placeholder = 'Добавьте номер телефона',
+                        error,
                     }) => {
-    const [error, setError] = useState('');
     const labelRef = useRef(null);
-    const [errorOffset, setErrorOffset] = useState(80); // Default fallback
+    const [errorOffset, setErrorOffset] = useState(80);
 
-    // Dynamically calculate label width for error positioning
     useEffect(() => {
         if (labelRef.current) {
-            setErrorOffset(labelRef.current.offsetWidth + 10); // Label width + padding
+            setErrorOffset(labelRef.current.offsetWidth + 10);
         }
     }, [label]);
-
-    const validatePhone = (value) => {
-        if (value === '') {
-            setError(''); // Clear error for empty input
-            return true; // Allow empty input
-        }
-        if (!isValidPhoneNumber(value)) {
-            setError('Неверный номер телефона');
-            return false;
-        }
-        setError('');
-        return true;
-    };
 
     const handleChange = (value) => {
         const syntheticEvent = {
@@ -41,24 +27,19 @@ const PhoneInput = ({
             },
         };
         onChange(syntheticEvent);
-        validatePhone(value);
     };
 
-    // Use name to create unique IDs
     const inputId = `phone-${name}`;
     const errorId = `phoneError-${name}`;
 
     return (
         <div className="form-group">
-            <div className="label-error-container">
+            <div className="label-container">
                 <label ref={labelRef} htmlFor={inputId}>{label}</label>
                 {error && (
-                    <div
-                        id={errorId}
-                        className="invalid-feedback"
-                        style={{ left: `${errorOffset}px` }}
-                    >
-                        {error}
+                    <div className="error-tooltip">
+                        <FiAlertCircle className="tooltip-icon" />
+                        <span className="tooltip-text">{error}</span>
                     </div>
                 )}
             </div>
@@ -66,7 +47,7 @@ const PhoneInput = ({
                 mask="+7 (000) 000-00-00"
                 value={phone}
                 onAccept={handleChange}
-                className={`form-control ${error ? 'is-invalid' : ''}`}
+                className={`form-control ${error ? 'has-error' : ''}`}
                 placeholder={placeholder}
                 id={inputId}
                 name={name}

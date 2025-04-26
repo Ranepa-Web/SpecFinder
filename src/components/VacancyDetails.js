@@ -5,6 +5,9 @@ import { useParams, Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { fetchData, updateData, createData } from "../server/api"
 import PhoneInput from "./inputs/PhoneInput";
+import {isValidPhoneNumber} from "libphonenumber-js";
+
+import { FiAlertCircle } from "react-icons/fi"
 
 const VacancyDetails = () => {
   const { id } = useParams()
@@ -20,6 +23,7 @@ const VacancyDetails = () => {
   const [submitted, setSubmitted] = useState(false)
   const [alreadyApplied, setAlreadyApplied] = useState(false)
   const [similarVacancies, setSimilarVacancies] = useState([])
+  const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
     const loadVacancy = async () => {
@@ -71,16 +75,44 @@ const VacancyDetails = () => {
   }, [id, currentUser])
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setApplication({
-      ...application,
-      [name]: value,
-    })
-  }
+    const { name, value } = e.target;
+    setApplication(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // Очищаем ошибку при изменении значения
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
+  };
 
   // Исправляем функцию отклика на вакансию
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
+
+    // Валидация полей
+    const errors = {};
+
+    if (!application.coverLetter.trim()) {
+      errors.coverLetter = 'Сопроводительное письмо обязательно для заполнения';
+    }
+
+    if (application.contactPhone && !isValidPhoneNumber(application.contactPhone)) {
+      errors.contactPhone = 'Неверный формат номера телефона';
+    } else {
+      validationErrors.contactPhone = null
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
 
     if (!currentUser) {
       alert("Пожалуйста, войдите в систему, чтобы откликнуться на вакансию")
@@ -242,31 +274,39 @@ const VacancyDetails = () => {
                   <p>Работодатель свяжется с вами, если ваша кандидатура будет интересна.</p>
                 </div>
               ) : (
-                <form className="application-form" onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <label htmlFor="coverLetter">Сопроводительное письмо:</label>
-                    <textarea
-                      id="coverLetter"
-                      name="coverLetter"
-                      className="form-control"
-                      value={application.coverLetter}
-                      onChange={handleInputChange}
-                      placeholder="Расскажите, почему вы подходите на эту должность..."
-                      rows="5"
-                      required
-                    ></textarea>
-                  </div>
+                  <form className="application-form" onSubmit={handleSubmit}>
+                    <div className="form-group">
+                      <div className="label-container">
+                          <label htmlFor="coverLetter">Сопроводительное письмо</label>
+                          {validationErrors.coverLetter && (
+                              <div className="error-tooltip">
+                                <FiAlertCircle className="tooltip-icon" />
+                                <span className="tooltip-text">{validationErrors.coverLetter}</span>
+                              </div>
+                          )}
+                      </div>
+                      <textarea
+                          id="coverLetter"
+                          name="coverLetter"
+                          className={`form-control ${validationErrors.coverLetter ? 'has-error' : ''}`}
+                          value={application.coverLetter}
+                          onChange={handleInputChange}
+                          placeholder="Расскажите, почему вы подходите на эту должность..."
+                          rows="5"
+                      />
+                    </div>
 
-                  <PhoneInput
-                      name="contactPhone"
-                      phone={application.contactPhone}
-                      onChange={handleInputChange}
-                  />
+                    <PhoneInput
+                        name="contactPhone"
+                        phone={application.contactPhone}
+                        onChange={handleInputChange}
+                        error={validationErrors.contactPhone}
+                    />
 
-                  <button type="submit" className="button button_blue_m">
-                    Отправить отклик
-                  </button>
-                </form>
+                    <button type="submit" className="button button_blue_m">
+                      Отправить отклик
+                    </button>
+                  </form>
               )}
             </div>
           )}
