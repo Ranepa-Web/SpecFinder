@@ -1,123 +1,224 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-// import { useNavigate } from 'react-router-dom'; // Можно раскомментировать для редиректов
+"use client"
 
-// --- Ключи для localStorage ---
-const USER_DATA_KEY = 'specfinder_currentUser'; // Для данных текущего пользователя
-const ALL_USERS_KEY = 'specfinder_users';      // Для списка всех "зарегистрированных"
+import { createContext, useState, useEffect, useContext } from "react"
+import { fetchData, updateData, createData } from "../server/api"
 
-// --- Контекст ---
-const AuthContext = createContext(null);
+export const AuthContext = createContext()
 
-// --- Хук для доступа к контексту ---
-export function useAuth() {
-    const context = useContext(AuthContext);
-    if (context === null) {
-        throw new Error('useAuth должен использоваться внутри AuthProvider');
+export const AuthProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Проверяем, есть ли сохраненный пользователь в localStorage
+    const user = localStorage.getItem("currentUser")
+    if (user) {
+      setCurrentUser(JSON.parse(user))
     }
-    return context;
+    setLoading(false)
+  }, [])
+
+  // Функция для регистрации пользователя
+  const register = async (email, password, name, userType) => {
+    try {
+      // Получаем всех пользователей
+      const users = await fetchData("users")
+
+      // Проверяем, существует ли уже пользователь с таким email
+      const existingUser = users.find((user) => user.email === email)
+
+      if (existingUser) {
+        throw new Error("Пользователь с таким email уже существует")
+      }
+
+      // Создаем нового пользователя
+      const newUser = {
+        id: Date.now().toString(),
+        email,
+        name,
+        userType,
+        password, // В реальном приложении пароль должен быть захеширован
+        profile:
+          userType === "jobseeker"
+            ? {
+                position: "",
+                skills: [],
+                experience: "",
+                education: "",
+                about: "",
+                contacts: {
+                  phone: "",
+                  telegram: "",
+                  linkedin: "",
+                },
+                resume: null,
+                appliedJobs: [],
+              }
+            : {
+                companyName: name,
+                industry: "",
+                companySize: "",
+                description: "",
+                website: "",
+                contacts: {
+                  phone: "",
+                  email: email,
+                  address: "",
+                },
+                postedJobs: [],
+              },
+      }
+
+      // Сохраняем пользователя в "базе данных"
+      await createData("users", newUser)
+
+      // Устанавливаем текущего пользователя
+      setCurrentUser(newUser)
+      localStorage.setItem("currentUser", JSON.stringify(newUser))
+
+      return newUser
+    } catch (error) {
+      console.error("Ошибка при регистрации:", error)
+      throw error
+    }
+  }
+
+  // Функция для входа пользователя
+  const login = async (email, password) => {
+    try {
+      // Получаем всех пользователей
+      const users = await fetchData("users")
+
+      // Ищем пользователя с указанными email и паролем
+      const user = users.find((user) => user.email === email && user.password === password)
+
+      if (!user) {
+        throw new Error("Неверный email или пароль")
+      }
+
+      // Устанавливаем текущего пользователя
+      setCurrentUser(user)
+      localStorage.setItem("currentUser", JSON.stringify(user))
+
+      return user
+    } catch (error) {
+      console.error("Ошибка при входе:", error)
+      throw error
+    }
+  }
+
+  // Функция для выхода пользователя
+  const logout = () => {
+    setCurrentUser(null)
+    localStorage.removeItem("currentUser")
+  }
+
+  // Функция для обновления профиля пользователя
+  const updateProfile = async (profileData) => {
+    try {
+      // Обновляем данные текущего пользователя
+      const updatedUser = {
+        ...currentUser,
+        ...profileData,
+      }
+
+      // Обновляем пользователя в "базе данных"
+      await updateData("users", updatedUser.id, updatedUser)
+
+      // Обновляем текущего пользователя
+      setCurrentUser(updatedUser)
+      localStorage.setItem("currentUser", JSON.stringify(updatedUser))
+
+      return updatedUser
+    } catch (error) {
+      console.error("Ошибка при обновлении профиля:", error)
+      throw error
+    }
+  }
+
+  // Исправляем функцию создания отклика на вакансию
+  const applyForJob = async (jobId) => {
+    try {
+      if (currentUser.userType !== "jobseeker") {
+        throw new Error("Только соискатели могут откликаться на вакансии")
+      }
+
+      // Проверяем, не откликался ли пользователь уже на эту вакансию
+      if (currentUser.profile.appliedJobs && currentUser.profile.appliedJobs.includes(jobId)) {
+        throw new Error("Вы уже откликнулись на эту вакансию")
+      }
+
+      // Получаем вакансию
+      const vacancies = await fetchData("vacancies")
+      const vacancy = vacancies.find((v) => v.id === jobId)
+
+      if (!vacancy) {
+        throw new Error("Вакансия не найдена")
+      }
+
+      // Добавляем вакансию в список откликов пользователя
+      const updatedUser = {
+        ...currentUser,
+        profile: {
+          ...currentUser.profile,
+          appliedJobs: [...(currentUser.profile.appliedJobs || []), jobId],
+        },
+      }
+
+      // Обновляем данные пользователя
+      await updateData("users", updatedUser.id, updatedUser)
+
+      // Обновляем текущего пользователя
+      setCurrentUser(updatedUser)
+      localStorage.setItem("currentUser", JSON.stringify(updatedUser))
+
+      // Создаем отклик с актуальной датой
+      const newApplication = {
+        id: Date.now(),
+        vacancyId: jobId,
+        vacancyTitle: vacancy.title,
+        companyName: vacancy.company,
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userEmail: currentUser.email,
+        date: new Date("2025-04-22").toISOString(),
+        status: "pending",
+        coverLetter: "Здравствуйте! Я заинтересован в данной вакансии и хотел бы предложить свою кандидатуру.",
+        contactPhone: currentUser.profile.contacts?.phone || "",
+      }
+
+      // Сохраняем отклик
+      await createData("applications", newApplication)
+
+      // Обновляем вакансию, добавляя отклик
+      const updatedVacancy = {
+        ...vacancy,
+        applications: [...(vacancy.applications || []), newApplication.id],
+      }
+
+      await updateData("vacancies", updatedVacancy.id, updatedVacancy)
+
+      return updatedUser
+    } catch (error) {
+      console.error("Ошибка при отклике на вакансию:", error)
+      throw error
+    }
+  }
+
+  const value = {
+    currentUser,
+    loading,
+    register,
+    login,
+    logout,
+    updateProfile,
+    applyForJob,
+    isAuthenticated: !!currentUser,
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-// --- Вспомогательные функции для localStorage списка пользователей ---
-const getUsersFromStorage = () => {
-    const usersJson = localStorage.getItem(ALL_USERS_KEY);
-    try { return usersJson ? JSON.parse(usersJson) : []; }
-    catch (error) { console.error("Ошибка парсинга:", error); return []; }
-};
-const saveUsersToStorage = (users) => {
-    try { localStorage.setItem(ALL_USERS_KEY, JSON.stringify(users)); }
-    catch (error) { console.error("Ошибка сохранения:", error); }
-};
-// --- Конец вспомогательных функций ---
-
-// --- Компонент Провайдер ---
-export function AuthProvider({ children }) {
-    const [currentUser, setCurrentUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    // const navigate = useNavigate();
-
-    // Статус аутентификации вычисляется из currentUser
-    const isAuthenticated = !!currentUser;
-
-    // Восстановление состояния при загрузке
-    useEffect(() => {
-        setLoading(true);
-        let userToSet = null;
-        try {
-            const userDataJson = localStorage.getItem(USER_DATA_KEY);
-            if (userDataJson) { userToSet = JSON.parse(userDataJson); }
-        } catch (error) {
-            console.error("Ошибка восстановления currentUser:", error);
-            localStorage.removeItem(USER_DATA_KEY);
-        } finally {
-            setCurrentUser(userToSet);
-            setLoading(false);
-            console.log('AuthProvider: Проверка завершена. currentUser:', userToSet);
-        }
-    }, []);
-
-    // Функция ВХОДА
-    const login = useCallback(async (email, password) => {
-        console.log('Вход (localStorage):', email);
-        await new Promise(resolve => setTimeout(resolve, 100)); // Имитация
-
-        const users = getUsersFromStorage();
-        const user = users.find(u => u.email === email);
-
-        // НЕБЕЗОПАСНОЕ СРАВНЕНИЕ ПАРОЛЯ  Только для демо сделал если что
-        if (user && user.password === password) {
-            const userData = { id: user.id, name: user.name, email: user.email };
-            localStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
-            setCurrentUser(userData);
-            console.log('Успешный вход для:', userData);
-            return userData;
-        } else {
-            localStorage.removeItem(USER_DATA_KEY);
-            setCurrentUser(null);
-            throw new Error('Неверный email или пароль.');
-        }
-    }, []);
-
-    // Функция ВЫХОДА
-    const logout = useCallback(() => {
-        console.log('Выход (localStorage)');
-        localStorage.removeItem(USER_DATA_KEY);
-        setCurrentUser(null);
-        // navigate('/login');
-    }, []);
-
-    // Функция РЕГИСТРАЦИИ
-    const register = useCallback(async (name, email, password) => {
-        console.log('Регистрация (localStorage):', name, email);
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        const users = getUsersFromStorage();
-        if (users.some(user => user.email === email)) {
-            throw new Error('Этот email уже зарегистрирован.');
-        }
-        if (!name || !email || !password) {
-             throw new Error('Все поля обязательны для регистрации.');
-        }
-         if (password.length < 6) {
-             throw new Error('Пароль должен быть не менее 6 символов.');
-        }
-
-        // НЕБЕЗОПАСНОЕ ХРАНЕНИЕ ПАРОЛЯ ЕСЛИ ЧТО
-        const newUser = { id: Date.now(), name, email, password };
-        const updatedUsers = [...users, newUser];
-        saveUsersToStorage(updatedUsers);
-
-        console.log('Пользователь добавлен в', ALL_USERS_KEY, ':', newUser);
-        // Не логиним пользователя автоматически
-        return { success: true, message: 'Регистрация успешна.' };
-    }, []);
-
-    // Значение контекста
-    const value = { currentUser, isAuthenticated, loading, login, logout, register };
-
-    // Не рендерим детей, пока идет загрузка
-    return (
-        <AuthContext.Provider value={value}>
-            {!loading && children}
-        </AuthContext.Provider>
-    );
+export const useAuth = () => {
+  return useContext(AuthContext)
 }

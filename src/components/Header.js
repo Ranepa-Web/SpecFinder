@@ -1,38 +1,113 @@
-import React from 'react';
-import { Link } from "react-router-dom"; // Используем Link
+"use client"
+import { Link, NavLink } from "react-router-dom"
+import { useAuth } from "../context/AuthContext"
+import { useState, useEffect } from "react"
 
-export const Header = ({ isAuthenticated, onLogout }) => {
-    return (
-        <div className="container">
-            <header>
-                {/* Логотип */}
-                <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <h4>SpecFinder</h4>
-                </Link>
-                {/* Навигация */}
-                <div className="header-nav">
-                    {isAuthenticated ? (
-                        <> {/* Вошел */}
-                            <Link to="/profile" className="btn button_h4">
-                                Профиль
-                            </Link>
-                            <button type="button" onClick={onLogout} className="btn button_h4">
-                                Выйти
-                            </button>
-                        </>
-                    ) : (
-                        <> {/* Не вошел */}
-                            <Link to="/login" className="btn button_h4">
-                                Вход
-                            </Link>
-                            <Link to="/register" className="btn button_h4">
-                                Регистрация
-                            </Link>
-                        </>
-                    )}
-                </div>
-            </header>
-        </div>
-    );
+const Header = () => {
+  const { isAuthenticated, logout, currentUser } = useAuth()
+  const [darkMode, setDarkMode] = useState(false)
+
+  // Проверяем сохраненную тему при загрузке
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme")
+    if (savedTheme === "dark") {
+      setDarkMode(true)
+      document.body.classList.add("dark-mode")
+    }
+  }, [])
+
+  // Переключение темы
+  const toggleTheme = () => {
+    setDarkMode(!darkMode)
+    if (darkMode) {
+      document.body.classList.remove("dark-mode")
+      localStorage.setItem("theme", "light")
+    } else {
+      document.body.classList.add("dark-mode")
+      localStorage.setItem("theme", "dark")
+    }
+  }
+
+  return (
+    <header>
+      <div className="container">
+        <Link to="/" className="logo-link">
+          <h4>SpecFinder</h4>
+        </Link>
+        <nav className="header-nav">
+          {isAuthenticated ? (
+            <>
+              {/* Показываем "Поиск специалистов" только для работодателей */}
+              {currentUser?.userType === "employer" && (
+                <NavLink to="/search-specialists" className="nav-link">
+                  Поиск специалистов
+                </NavLink>
+              )}
+              <NavLink to="/vacancies" className="nav-link">
+                Вакансии
+              </NavLink>
+              <NavLink
+                to={currentUser?.userType === "jobseeker" ? "/applicant-profile" : "/employer-profile"}
+                className="nav-link"
+              >
+                Мой профиль
+              </NavLink>
+              <button type="button" onClick={logout} className="nav-link nav-button">
+                Выйти
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink to="/vacancies" className="nav-link">
+                Вакансии
+              </NavLink>
+              <NavLink to="/login" className="nav-link">
+                Вход
+              </NavLink>
+              <NavLink to="/register" className="nav-link">
+                Регистрация
+              </NavLink>
+            </>
+          )}
+          <button className="theme-toggle" onClick={toggleTheme} title="Переключить тему">
+            {darkMode ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            )}
+          </button>
+        </nav>
+      </div>
+    </header>
+  )
 }
-export default Header;
+
+export default Header

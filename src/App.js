@@ -1,88 +1,149 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-
-// Импорты контекста и компонентов
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { LoginForm } from './components/LoginForm';
-import { RegisterForm } from './components/RegisterForm'; // <-- Добавлен импорт
-import PerformerProfile from './components/PerformerProfile'; // <-- Добавлен импорт
-import Header from './components/Header';
-import MainBanner from './components/MainBanner';
-import Search from './components/Search';
+"use client"
+import { Navigate, BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { useAuth, AuthProvider } from "./context/AuthContext"
+import { PROFILE_TYPES } from "./constants"
+import { useEffect } from "react"
+import { initializeDatabase } from "./server/api"
+import Header from "./components/Header"
+import Footer from "./components/Footer"
+import BackToTop from "./components/BackToTop"
+import HomePage from "./components/HomePage"
+import AboutPage from "./components/AboutPage"
+import HowItWorksPage from "./components/HowItWorksPage"
+import LoginForm from "./components/LoginForm"
+import RegisterForm from "./components/RegisterForm"
+import VacancyList from "./components/VacancyList"
+import VacancyDetails from "./components/VacancyDetails"
+import CreateVacancyForm from "./components/CreateVacancyForm"
+import UserProfile from "./components/UserProfile"
+import ApplicationsList from "./components/ApplicationsList"
+import Search from "./components/Search"
+import ReviewsPage from "./components/ReviewsPage"
 
 // Компонент для защиты маршрутов
-const PrivateRoute = ({ children }) => {
-    const { isAuthenticated, loading } = useAuth();
+const PrivateRoute = ({ children, allowedUserTypes = null }) => {
+  const { currentUser, loading } = useAuth()
 
-    if (loading) { return <div>Проверка аутентификации...</div>; } // Показываем загрузку
+  if (loading) {
+    return <div className="loading-indicator">Проверка аутентификации...</div>
+  }
 
-    return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
+  // Проверка типа пользователя, если указаны разрешенные типы
+  if (allowedUserTypes && currentUser && !allowedUserTypes.includes(currentUser.userType)) {
+    return <Navigate to="/" replace />
+  }
 
-// Компонент-обертка с шапкой
+  return currentUser ? children : <Navigate to="/login" replace />
+}
+
+// Компонент-обертка с шапкой, основным контентом и футером
 const Layout = ({ children }) => {
-    const { isAuthenticated, logout } = useAuth();
-    return (
-        <div className="app-wrapper">
-            <Header isAuthenticated={isAuthenticated} onLogout={logout} />
-            <main className="main-content">
-                {children}
-            </main>
-        </div>
-    );
-};
+  return (
+    <div className="app-wrapper">
+      <Header />
+      <main className="main-content">{children}</main>
+      <Footer />
+      <BackToTop />
+    </div>
+  )
+}
 
 // Компонент с основной логикой маршрутизации
 const AppContent = () => {
-    const { isAuthenticated, loading } = useAuth();
+  const { loading, currentUser } = useAuth()
 
-    if (loading) { return <div>Загрузка приложения...</div>; } // Показываем загрузку
+  useEffect(() => {
+    // Инициализируем базу данных при первой загрузке приложения
+    initializeDatabase()
+  }, [])
 
-    return (
-        <Routes>
-            {/* Главная страница */}
-            <Route path="/" element={
-                    <PrivateRoute> <Layout> <MainBanner /> <Search /> </Layout> </PrivateRoute>
-                } />
-            {/* Страница профиля */}
-            <Route path="/profile" element={
-                    <PrivateRoute> <Layout> <PerformerProfile /> </Layout> </PrivateRoute>
-                } />
-            {/* Страница входа */}
-            <Route path="/login" element={
-                    isAuthenticated ? <Navigate to="/" replace /> : <Layout> <LoginForm /> </Layout>
-                } />
-            {/* Страница регистрации */}
-            <Route path="/register" element={
-                    isAuthenticated ? <Navigate to="/" replace /> : <Layout> <RegisterForm /> </Layout>
-                } />
-            {/* Редирект для всех остальных путей */}
-             <Route path="*" element={ <Navigate to={isAuthenticated ? "/" : "/login"} replace /> } />
-        </Routes>
-    );
-};
+  if (loading) {
+    return <div className="loading-indicator">Загрузка приложения...</div>
+  }
 
-// Главный компонент приложения
-export const App = () => {
-    return (
-        <AuthProvider>
-            <Router>
-                <AppContent />
-            </Router>
-        </AuthProvider>
-    );
-};
+  // Определяем тип профиля для перенаправления
+  const getProfilePath = () => {
+    if (!currentUser) return "/"
+    return currentUser.userType === PROFILE_TYPES.APPLICANT ? "/applicant-profile" : "/employer-profile"
+  }
 
-// class App extends React.Component {
-//     render () {
-//         return (
-//             <div>
-//                 <Header />
-//                 <MainBanner />
-//                 <Search />
-//             </div>
-//         )
-//     }
-// }
-//
-// export default App
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/how-it-works" element={<HowItWorksPage />} />
+      <Route path="/reviews" element={<ReviewsPage />} />
+      <Route path="/login" element={<LoginForm />} />
+      <Route path="/register" element={<RegisterForm />} />
+      <Route path="/vacancies" element={<VacancyList />} />
+      <Route path="/vacancy/:id" element={<VacancyDetails />} />
+
+      {/* Защищенные маршруты */}
+      <Route
+        path="/create-vacancy"
+        element={
+          <PrivateRoute allowedUserTypes={[PROFILE_TYPES.EMPLOYER]}>
+            <CreateVacancyForm />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/applicant-profile"
+        element={
+          <PrivateRoute allowedUserTypes={[PROFILE_TYPES.APPLICANT]}>
+            <UserProfile profileType={PROFILE_TYPES.APPLICANT} />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/employer-profile"
+        element={
+          <PrivateRoute allowedUserTypes={[PROFILE_TYPES.EMPLOYER]}>
+            <UserProfile profileType={PROFILE_TYPES.EMPLOYER} />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/applications"
+        element={
+          <PrivateRoute>
+            <ApplicationsList />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/search-specialists"
+        element={
+          <PrivateRoute allowedUserTypes={[PROFILE_TYPES.EMPLOYER]}>
+            <Search />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Перенаправление на профиль */}
+      <Route path="/profile" element={<Navigate to={getProfilePath()} replace />} />
+
+      {/* Маршрут для несуществующих страниц */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
+
+// Основной компонент приложения
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Layout>
+          <AppContent />
+        </Layout>
+      </Router>
+    </AuthProvider>
+  )
+}
+
+export default App

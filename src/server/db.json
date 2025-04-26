@@ -1,0 +1,113 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Иван Петров",
+      "email": "ivan@example.com",
+      "password": "password123",
+      "userType": "jobseeker",
+      "profile": {
+        "position": "Frontend-разработчик",
+        "skills": ["JavaScript", "React", "CSS"],
+        "experience": "3-5",
+        "education": "Высшее техническое",
+        "about": "Опытный frontend-разработчик с 4-летним стажем работы.",
+        "contacts": {
+          "phone": "+7 (999) 123-45-67",
+          "telegram": "@ivanpetrov",
+          "linkedin": "linkedin.com/in/ivanpetrov"
+        },
+        "resume": null,
+        "appliedJobs": []
+      }
+    },
+    {
+      "id": 2,
+      "name": "ООО ТехноСтарт",
+      "email": "hr@technostart.com",
+      "password": "company123",
+      "userType": "employer",
+      "profile": {
+        "companyName": "ООО ТехноСтарт",
+        "industry": "IT",
+        "companySize": "50-100",
+        "description": "Компания, специализирующаяся на разработке веб-приложений.",
+        "website": "technostart.com",
+        "contacts": {
+          "phone": "+7 (495) 123-45-67",
+          "email": "hr@technostart.com",
+          "address": "г. Москва, ул. Примерная, д. 1"
+        },
+        "postedJobs": []
+      }
+    }
+  ],
+  "vacancies": [
+    {
+      "id": 1,
+      "title": "Frontend-разработчик",
+      "company": "ООО ТехноСтарт",
+      "salary": "120000 - 150000",
+      "location": "Москва",
+      "remote": true,
+      "description": "Требуется опытный frontend-разработчик для работы над крупным веб-приложением. Опыт работы с React от 2 лет.",
+      "requirements": ["React", "JavaScript", "CSS", "HTML5"],
+      "date": "2025-04-15T10:00:00.000Z",
+      "authorId": 2,
+      "applications": []
+    },
+    {
+      "id": 2,
+      "title": "Backend-разработчик",
+      "company": "ООО ТехноСтарт",
+      "salary": "150000 - 180000",
+      "location": "Москва",
+      "remote": true,
+      "description": "Требуется опытный backend-разработчик для работы над API. Опыт работы с Node.js от 3 лет.",
+      "requirements": ["Node.js", "Express", "MongoDB", "REST API"],
+      "date": "2025-04-08T10:00:00.000Z",
+      "authorId": 2,
+      "applications": []
+    },
+    {
+      "id": 3,
+      "title": "UI/UX дизайнер",
+      "company": "Дизайн Студия",
+      "salary": "100000 - 130000",
+      "location": "Санкт-Петербург",
+      "remote": false,
+      "description": "Требуется креативный UI/UX дизайнер для работы над мобильными приложениями.",
+      "requirements": ["Figma", "Adobe XD", "Sketch", "Прототипирование"],
+      "date": "2025-04-22T10:00:00.000Z",
+      "authorId": 3,
+      "applications": []
+    }
+  ],
+  "applications": [],
+  "reviews": [
+    {
+      "id": 1,
+      "name": "Алексей Петров",
+      "rating": 5,
+      "text": "Отличный сервис! Нашел работу мечты за неделю после регистрации.",
+      "date": "2025-04-22",
+      "userType": "jobseeker"
+    },
+    {
+      "id": 2,
+      "name": "ООО \"ТехноСтарт\"",
+      "rating": 4,
+      "text": "Удобная платформа для поиска сотрудников. Интерфейс понятный, много откликов от квалифицированных специалистов.",
+      "date": "2025-04-15",
+      "userType": "employer"
+    },
+    {
+      "id": 3,
+      "name": "Мария Иванова",
+      "rating": 5,
+      "text": "Благодаря этому сайту я нашла удаленную работу в IT-компании. Очень удобный поиск и фильтрация вакансий.",
+      "date": "2025-04-08",
+      "userType": "jobseeker"
+    }
+  ]
+}
