@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { PROFILE_TYPES } from "../constants"
 import PhoneInput from "./inputs/PhoneInput"
 import "../css/inputs/phone_input.css"
 import {isValidPhoneNumber} from "libphonenumber-js";
+import SkillsInput from "./forms/SkillsInput";
 
 function UserProfile({ profileType }) {
   const { currentUser } = useAuth()
@@ -61,7 +62,7 @@ function UserProfile({ profileType }) {
           city: user.profile?.city || "",
           position: user.profile?.position || "",
           experience: user.profile?.experience || "",
-          skills: user.profile?.skills?.join(", ") || "",
+          skills: user.profile?.skills || [],
           about: user.profile?.about || "",
           companyName: user.profile?.companyName || user.name || "",
           industry: user.profile?.industry || "",
@@ -116,7 +117,7 @@ function UserProfile({ profileType }) {
                 city: profileData.city,
                 position: profileData.position,
                 experience: profileData.experience,
-                skills: profileData.skills.split(",").map((skill) => skill.trim()),
+                skills: profileData.skills,
                 about: profileData.about,
                 contacts: {
                   ...user.profile.contacts,
@@ -277,15 +278,12 @@ function UserProfile({ profileType }) {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label htmlFor="skills">Навыки (через запятую)</label>
-                    <input
-                      type="text"
-                      id="skills"
-                      name="skills"
-                      className="form-control"
-                      placeholder="Например: JavaScript, React, CSS"
-                      value={profileData.skills}
-                      onChange={handleInputChange}
+                    <label htmlFor="skills">Навыки</label>
+                    <SkillsInput
+                        value={profileData.skills}
+                        onChange={handleInputChange}
+                        placeholder="React, Node.js, Figma..."
+                        autoAddNewSkills={true} // Автоматически добавлять новые навыки в общий список
                     />
                   </div>
                   <div className="form-group">

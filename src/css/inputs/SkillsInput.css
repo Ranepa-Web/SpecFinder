@@ -1,0 +1,103 @@
+/* src/css/SkillsInput.css */
+.skills-input-container {
+    position: relative;
+    width: 100%;
+}
+
+.skills-input-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    min-height: 38px;
+}
+
+.skill-tag {
+    display: flex;
+    align-items: center;
+    background-color: #e8f0fe; /* Светло-голубой фон как на скриншоте */
+    border-radius: 16px; /* Закругленные углы */
+    padding: 6px 12px;
+    font-size: 14px;
+    color: #1a73e8; /* Синий текст */
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+.skill-tag-remove {
+    background: none;
+    border: none;
+    color: #1a73e8;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    margin-left: 8px;
+    padding: 0;
+}
+
+.skill-tag-remove:hover {
+    color: #0d47a1;
+}
+
+.skills-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 4px 0;
+    min-width: 100px;
+    background: transparent;
+}
+
+.skills-suggestions {
+    position: absolute;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-item {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+/* Стиль для элемента "Добавить свой навык" */
+.suggestion-item-add {
+    border-top: 1px dashed #ccc;
+    color: #1a73e8;
+}
+
+.suggestion-item-add:hover {
+    background-color: #e8f0fe;
+}
+
+/* Стиль для пояснительного текста в списке подсказок */
+.suggestion-help-text {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #666;
+    background-color: #f5f5f5;
+    border-top: 1px solid #eee;
+    text-align: center;
+    cursor: default;
+}
+
+/* Подсказка внизу инпута */
+.skills-help-text {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #666;
+}

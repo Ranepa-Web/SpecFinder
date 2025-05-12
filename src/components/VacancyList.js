@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect, useContext } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { AuthContext } from "../context/AuthContext"
-import { fetchData } from "../server/api"
+import React, {useContext, useEffect, useState} from "react"
+import {Link, useNavigate} from "react-router-dom"
+import {AuthContext} from "../context/AuthContext"
+import {fetchData} from "../server/api"
+import SkillsInput from "./forms/SkillsInput";
 
 const VacancyList = ({ limit }) => {
   const [vacancies, setVacancies] = useState([])
@@ -50,13 +51,9 @@ const VacancyList = ({ limit }) => {
 
     if (name === "keywords") {
       // Обрабатываем ключевые слова как массив
-      const keywordsArray = value
-        .split(",")
-        .map((word) => word.trim())
-        .filter((word) => word !== "")
       setFilters({
         ...filters,
-        [name]: keywordsArray,
+        [name]: value,
       })
     } else {
       setFilters({
@@ -186,9 +183,11 @@ const VacancyList = ({ limit }) => {
       }
 
       // Фильтрация по ключевым словам/навыкам
+      console.log(filters.keywords)
       if (filters.keywords && filters.keywords.length > 0) {
         result = result.filter((vacancy) => {
           // Проверяем наличие ключевых слов в заголовке, описании или требованиях
+          console.log(filters.keywords)
           return filters.keywords.some((keyword) => {
             const keywordRegex = new RegExp(keyword, "i")
             return (
@@ -498,16 +497,14 @@ const VacancyList = ({ limit }) => {
 
             {/* Новый фильтр по ключевым словам/навыкам */}
             <div className="filter-group">
-              <label>Ключевые навыки</label>
-              <input
-                type="text"
-                name="keywords"
-                value={filters.keywords.join(", ")}
-                onChange={handleFilterChange}
-                className="form-control"
-                placeholder="Например: React, JavaScript"
+              <label htmlFor="keywords">Ключевые навыки</label>
+              <SkillsInput
+                  value={filters.keywords}
+                  onChange={handleFilterChange}
+                  name = "keywords"
+                  placeholder="React, Node.js, Figma..."
+                  autoAddNewSkills={false} // Автоматически добавлять новые навыки в общий список
               />
-              <small className="filter-hint">Введите навыки через запятую</small>
             </div>
 
             <div className="filter-group">
