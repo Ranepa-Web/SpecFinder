@@ -4,6 +4,9 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { PROFILE_TYPES } from "../constants"
+import PhoneInput from "./inputs/PhoneInput"
+import "../css/inputs/phone_input.css"
+import {isValidPhoneNumber} from "libphonenumber-js";
 
 function UserProfile({ profileType }) {
   const { currentUser } = useAuth()
@@ -26,6 +29,7 @@ function UserProfile({ profileType }) {
     description: "",
   })
   const [successMessage, setSuccessMessage] = useState("")
+  const [validationErrors, setValidationErrors] = useState({});
 
   // Загрузка данных при монтировании
   useEffect(() => {
@@ -82,6 +86,20 @@ function UserProfile({ profileType }) {
 
   const handleSaveProfile = () => {
     try {
+
+      // Валидация полей
+      const errors = {};
+      if (profileData.phone && !isValidPhoneNumber(profileData.phone)) {
+        errors.phone = 'Неверный формат номера телефона';
+      } else {
+        validationErrors.phone = null
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        return;
+      }
+
       // Получаем текущих пользователей
       const users = JSON.parse(localStorage.getItem(`db_users`)) || []
 
@@ -206,18 +224,12 @@ function UserProfile({ profileType }) {
                       readOnly
                     />
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="phone">Телефон</label>
-                    <input
-                      type="tel"
-                      id="phone"
+                  <PhoneInput
                       name="phone"
-                      className="form-control"
-                      placeholder="Добавьте номер телефона"
-                      value={profileData.phone}
+                      phone={profileData.phone}
                       onChange={handleInputChange}
-                    />
-                  </div>
+                      error={validationErrors.phone}
+                  />
                   <div className="form-group">
                     <label htmlFor="city">Город</label>
                     <input
@@ -455,18 +467,12 @@ function UserProfile({ profileType }) {
                       readOnly
                     />
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="phone">Телефон</label>
-                    <input
-                      type="tel"
-                      id="phone"
+                  <PhoneInput
                       name="phone"
-                      className="form-control"
-                      placeholder="Добавьте номер телефона"
-                      value={profileData.phone}
+                      phone={profileData.phone}
                       onChange={handleInputChange}
-                    />
-                  </div>
+                      error={validationErrors.phone}
+                  />
                 </div>
               </div>
 
