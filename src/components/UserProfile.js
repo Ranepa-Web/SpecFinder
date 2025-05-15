@@ -283,7 +283,7 @@ function UserProfile({ profileType }) {
                         value={profileData.skills}
                         onChange={handleInputChange}
                         placeholder="React, Node.js, Figma..."
-                        autoAddNewSkills={true} // Автоматически добавлять новые навыки в общий список
+                        autoAddNewSkills={true}
                     />
                   </div>
                   <div className="form-group">

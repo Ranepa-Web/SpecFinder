@@ -501,7 +501,7 @@ const VacancyList = ({ limit }) => {
               <SkillsInput
                   value={filters.keywords}
                   onChange={handleFilterChange}
-                  name = "keywords"
+                  name="keywords"
                   placeholder="React, Node.js, Figma..."
                   autoAddNewSkills={false} // Автоматически добавлять новые навыки в общий список
               />

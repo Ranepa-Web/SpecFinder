@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { createData } from "../server/api"
+import SkillsInput from "./forms/SkillsInput";
 
 const CreateVacancyForm = () => {
   const navigate = useNavigate()
@@ -52,10 +53,7 @@ const CreateVacancyForm = () => {
         location: formData.location,
         remote: formData.remote,
         description: formData.description,
-        requirements: formData.requirements
-          .split(",")
-          .map((req) => req.trim())
-          .filter((req) => req !== ""),
+        requirements: formData.requirements,
         date: new Date("2025-04-22").toISOString(),
         authorId: currentUser.id,
         applications: [],
@@ -209,16 +207,14 @@ const CreateVacancyForm = () => {
               <label htmlFor="requirements" className="form-label">
                 Требования (через запятую)
               </label>
-              <textarea
-                id="requirements"
-                name="requirements"
-                className="form-control"
-                rows="3"
-                placeholder="Например: React, JavaScript, CSS, HTML5"
-                value={formData.requirements}
-                onChange={handleChange}
-              ></textarea>
-              <small className="form-text text-muted">Укажите требуемые навыки и технологии через запятую</small>
+              <SkillsInput
+                  id="requirements"
+                  name="requirements"
+                  value={formData.requirements}
+                  onChange={handleChange}
+                  placeholder="React, Node.js, Figma..."
+                  autoAddNewSkills={true}
+              />
             </div>
 
             <div className="form-actions">
