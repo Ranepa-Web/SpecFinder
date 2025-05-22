@@ -314,7 +314,12 @@ const VacancyDetails = () => {
           {currentUser && currentUser.userType === "jobseeker" && alreadyApplied && (
             <div className="already-applied-message success-message">
               <p>Вы уже откликнулись на эту вакансию.</p>
-              <Link to="/applicant-profile" className="button button_gray_m">
+              <Link
+                  to={{
+                    pathname: "/applicant-profile",
+                    search: `?tab=applications&vacancyId=${id}`,
+                  }}
+                  className="button button_gray_m">
                 Перейти в профиль для просмотра статуса
               </Link>
             </div>
