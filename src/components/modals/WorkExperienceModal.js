@@ -1,62 +1,71 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, {useState, useCallback, useEffect} from "react"
 import "../../css/modal/modal.css"
 
-function WorkExperienceModal({ experience = null, onSave, onCancel }) {
+function WorkExperienceModal({experience = null, showModal = false, onCancel, onSave}) {
     const currentYear = new Date().getFullYear()
-    const years = Array.from({ length: 50 }, (_, i) => currentYear - i)
+    const years = Array.from({length: 50}, (_, i) => currentYear - i)
     const months = [
-        { value: 1, label: "Январь" },
-        { value: 2, label: "Февраль" },
-        { value: 3, label: "Март" },
-        { value: 4, label: "Апрель" },
-        { value: 5, label: "Май" },
-        { value: 6, label: "Июнь" },
-        { value: 7, label: "Июль" },
-        { value: 8, label: "Август" },
-        { value: 9, label: "Сентябрь" },
-        { value: 10, label: "Октябрь" },
-        { value: 11, label: "Ноябрь" },
-        { value: 12, label: "Декабрь" }
+        {value: 1, label: "Январь"},
+        {value: 2, label: "Февраль"},
+        {value: 3, label: "Март"},
+        {value: 4, label: "Апрель"},
+        {value: 5, label: "Май"},
+        {value: 6, label: "Июнь"},
+        {value: 7, label: "Июль"},
+        {value: 8, label: "Август"},
+        {value: 9, label: "Сентябрь"},
+        {value: 10, label: "Октябрь"},
+        {value: 11, label: "Ноябрь"},
+        {value: 12, label: "Декабрь"}
     ]
 
-    const [formData, setFormData] = useState({
-        companyName: "",
-        location: "",
-        website: "",
-        industry: "",
-        position: "",
-        startMonth: 1,
-        startYear: currentYear,
-        endMonth: 1,
-        endYear: currentYear,
-        currentlyWorking: false,
-        responsibilities: ""
-    })
+    // Инициализация formData с учетом experience
+    const getInitialFormData = useCallback(() => ({
+        companyName: experience?.companyName || "",
+        location: experience?.location || "",
+        website: experience?.website || "",
+        industry: experience?.industry || "",
+        position: experience?.position || "",
+        startMonth: experience?.startMonth || 1,
+        startYear: experience?.startYear || currentYear,
+        endMonth: experience?.endMonth || 1,
+        endYear: experience?.endYear || currentYear,
+        currentlyWorking: experience?.currentlyWorking || false,
+        responsibilities: experience?.responsibilities || ""
+    }),[experience, currentYear]);
 
+    const [formData, setFormData] = useState(getInitialFormData())
     const [errors, setErrors] = useState({})
 
+    const resetForm = useCallback(() => {
+        setFormData(getInitialFormData())
+        setErrors({})
+    }, [getInitialFormData])
+
     useEffect(() => {
-        if (experience) {
-            setFormData({
-                companyName: experience.companyName || "",
-                location: experience.location || "",
-                website: experience.website || "",
-                industry: experience.industry || "",
-                position: experience.position || "",
-                startMonth: experience.startMonth || 1,
-                startYear: experience.startYear || currentYear,
-                endMonth: experience.endMonth || 1,
-                endYear: experience.endYear || currentYear,
-                currentlyWorking: experience.currentlyWorking || false,
-                responsibilities: experience.responsibilities || ""
-            })
+        if (showModal) {
+            resetForm()
         }
-    }, [experience, currentYear])
+    }, [showModal, resetForm])
+
+    // Обработка нажатия клавиши Esc
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === "Escape" && showModal) {
+                onCancel()
+            }
+        }
+
+        document.addEventListener("keydown", handleKeyDown)
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown)
+        }
+    }, [showModal])
 
     const handleInputChange = (e) => {
-        const { name, value, type, checked } = e.target
+        const {name, value, type, checked} = e.target
         setFormData(prev => ({
             ...prev,
             [name]: type === "checkbox" ? checked : value
@@ -64,7 +73,7 @@ function WorkExperienceModal({ experience = null, onSave, onCancel }) {
 
         // Clear error when field is changed
         if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: null }))
+            setErrors(prev => ({...prev, [name]: null}))
         }
     }
 
@@ -110,10 +119,13 @@ function WorkExperienceModal({ experience = null, onSave, onCancel }) {
             currentlyWorking: formData.currentlyWorking,
             responsibilities: formData.responsibilities
         })
+
+        onCancel()
     }
 
     return (
-        <div className="modal-overlay">
+        <>
+            {showModal && (<div className="modal-overlay">
             <div className="modal-container work-experience-modal">
                 <div className="modal-header">
                     <h2>Место работы</h2>
@@ -280,7 +292,8 @@ function WorkExperienceModal({ experience = null, onSave, onCancel }) {
                     </div>
                 </form>
             </div>
-        </div>
+        </div>)}
+        </>
     )
 }
 

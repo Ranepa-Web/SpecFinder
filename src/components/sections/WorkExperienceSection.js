@@ -78,6 +78,10 @@ function WorkExperienceSection({ workExperiences = [], onChange }) {
     const getCompanyInitial = (companyName) => {
         return companyName ? companyName.charAt(0).toUpperCase() : ""
     }
+    const handleCloseModal = (modal) => {
+        console.log("HANDLE CANCEL")
+        setShowModal(false)
+    }
 
     return (
         <div className="profile-section work-experience-section">
@@ -134,14 +138,12 @@ function WorkExperienceSection({ workExperiences = [], onChange }) {
                     ))}
                 </div>
             )}
-
-            {showModal && (
-                <WorkExperienceModal
-                    experience={editingExperience}
-                    onSave={handleSaveExperience}
-                    onCancel={() => setShowModal(false)}
-                />
-            )}
+            <WorkExperienceModal
+                experience={editingExperience}
+                showModal={showModal}
+                onCancel={handleCloseModal}
+                onSave={handleSaveExperience}
+            />
         </div>
     )
 }
