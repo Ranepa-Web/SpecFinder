@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
+import React, {useState, useEffect, useRef} from "react"
+import {Link, useLocation} from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { PROFILE_TYPES } from "../constants"
 import PhoneInput from "./inputs/PhoneInput"
@@ -16,7 +16,11 @@ function ApplicantProfile() {
   const { currentUser } = useAuth()
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState("profile")
+  const routerLocation = useLocation()
+  const params = new URLSearchParams(routerLocation.search)
+  const initialTab = params.get("tab") === "applications" ? "applications" : "profile"
+  const itemRefs = {};
+  const [activeTab, setActiveTab] = useState(initialTab)
   const [profileData, setProfileData] = useState({
     name: currentUser?.name || "",
     email: currentUser?.email || "",
@@ -30,6 +34,14 @@ function ApplicantProfile() {
   })
   const [successMessage, setSuccessMessage] = useState("")
   const [validationErrors, setValidationErrors] = useState({})
+
+  useEffect(() => {
+    const vacancyId = parseInt(params.get("vacancyId"))
+    if (vacancyId && itemRefs[vacancyId]) {
+      scrollTo(vacancyId)
+
+    }
+  }, [itemRefs])
 
   useEffect(() => {
     setLoading(true)
@@ -66,6 +78,19 @@ function ApplicantProfile() {
       ...profileData,
       [name]: value,
     })
+  }
+
+  const scrollTo = (id) => {
+      const element = itemRefs[id];
+      if (element) {
+        const headerHeight = 80; // Замените на реальную высоту вашего header'а
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.scrollY - headerHeight;
+
+        window.scrollTo({
+          top: offsetPosition
+        });
+      }
   }
 
   const handleWorkExperienceChange = (workExperiences) => {
@@ -296,7 +321,10 @@ function ApplicantProfile() {
                 ) : (
                     <div className="applications-grid">
                       {applications.map((application) => (
-                          <div key={application.id} className="application-card">
+                          <div key={application.vacancyId}
+                               className="application-card"
+                               ref={el => (itemRefs[application.vacancyId] = el)}
+                          >
                             <div className="application-header">
                               <h4 className="application-title">{application.vacancyTitle}</h4>
                               <span className={`application-status status-${application.status}`}>
