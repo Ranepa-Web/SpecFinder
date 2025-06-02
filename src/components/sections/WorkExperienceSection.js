@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, {useEffect, useState} from "react"
 import WorkExperienceModal from "../modals/WorkExperienceModal"
 import "../../css/work_experience.css"
 
@@ -101,8 +101,10 @@ function WorkExperienceSection({ workExperiences = [], onChange }) {
                 </div>
             ) : (
                 <div className="work-experience-list">
-                    {workExperiences.map((experience, index) => (
-                        <div key={index} className="work-experience-item">
+                    {workExperiences.map((experience, index) => {
+                        console.log("item index:" + index)
+                        return (
+                        <div key={`item-${index}`} className="work-experience-item">
                             <div className="company-logo">
                                 {experience.companyLogo ? (
                                     <img src={experience.companyLogo} alt={experience.companyName} />
@@ -135,10 +137,11 @@ function WorkExperienceSection({ workExperiences = [], onChange }) {
                                 <span className="edit-icon">✎</span>
                             </button>
                         </div>
-                    ))}
+                    )})}
                 </div>
             )}
             <WorkExperienceModal
+                key={editingExperience?.index}
                 experience={editingExperience}
                 showModal={showModal}
                 onCancel={handleCloseModal}

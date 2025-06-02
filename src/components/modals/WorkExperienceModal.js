@@ -3,7 +3,7 @@
 import React, {useState, useCallback, useEffect} from "react"
 import "../../css/modal/modal.css"
 
-function WorkExperienceModal({experience = null, showModal = false, onCancel, onSave}) {
+function WorkExperienceModal({key = null, experience = null, showModal = false, onCancel, onSave}) {
     const currentYear = new Date().getFullYear()
     const years = Array.from({length: 50}, (_, i) => currentYear - i)
     const months = [
@@ -38,17 +38,6 @@ function WorkExperienceModal({experience = null, showModal = false, onCancel, on
 
     const [formData, setFormData] = useState(getInitialFormData())
     const [errors, setErrors] = useState({})
-
-    const resetForm = useCallback(() => {
-        setFormData(getInitialFormData())
-        setErrors({})
-    }, [getInitialFormData])
-
-    useEffect(() => {
-        if (showModal) {
-            resetForm()
-        }
-    }, [showModal, resetForm])
 
     // Обработка нажатия клавиши Esc
     useEffect(() => {
@@ -126,7 +115,7 @@ function WorkExperienceModal({experience = null, showModal = false, onCancel, on
     return (
         <>
             {showModal && (<div className="modal-overlay">
-            <div className="modal-container work-experience-modal">
+            <div className="modal-container work-experience-modal" key={`${showModal}-${key || 'new'}`}>
                 <div className="modal-header">
                     <h2>Место работы</h2>
                     <button className="close-button" onClick={onCancel}>×</button>
