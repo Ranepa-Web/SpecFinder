@@ -33,6 +33,7 @@ function ApplicantProfile() {
         workExperiences: []
     })
     const [successMessage, setSuccessMessage] = useState("")
+    const [errorMessage, setErrorMessage] = useState("")
     const [validationErrors, setValidationErrors] = useState({})
 
     useEffect(() => {
@@ -109,6 +110,10 @@ function ApplicantProfile() {
 
             if (Object.keys(errors).length > 0) {
                 setValidationErrors(errors)
+                setErrorMessage("Данные невалидны - проверьте выделенные поля")
+                setTimeout(() => {
+                    setErrorMessage("")
+                }, 3200)
                 return
             }
 
@@ -183,6 +188,10 @@ function ApplicantProfile() {
                         {successMessage && (<div className="success-popup">
                                 {successMessage}
                             </div>)}
+
+                        {errorMessage && (<div className="error-popup">
+                            {errorMessage}
+                        </div>)}
 
                         <div className="profile-section">
                             <h4 className="profile-section-title">Личная информация</h4>
@@ -352,6 +361,7 @@ function EmployerProfile() {
         description: "",
     })
     const [successMessage, setSuccessMessage] = useState("")
+    const [errorMessage, setErrorMessage] = useState("")
     const [validationErrors, setValidationErrors] = useState({})
 
     useEffect(() => {
@@ -415,6 +425,10 @@ function EmployerProfile() {
             setValidationErrors(errors)
 
             if (Object.keys(errors).length > 0) {
+                setErrorMessage("Данные невалидны - проверьте выделенные поля")
+                setTimeout(() => {
+                    setErrorMessage("")
+                }, 3200)
                 return
             }
 
@@ -493,6 +507,9 @@ function EmployerProfile() {
                         {successMessage && (<div className="success-popup">
                                 {successMessage}
                             </div>)}
+                        {errorMessage && (<div className="error-popup">
+                            {errorMessage}
+                        </div>)}
 
                         <div className="profile-section">
                             <h4 className="profile-section-title">Информация о компании</h4>
