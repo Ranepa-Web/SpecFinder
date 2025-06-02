@@ -2,6 +2,7 @@
 .skills-input-container {
     position: relative;
     width: 100%;
+    display: inline-block !important;
 }
 
 .skills-input-tags {
@@ -15,6 +16,8 @@
 
 .skill-tag {
     display: flex;
+    width: fit-content; /* размер по содержанию по горизонтали */
+    height: auto; /* размер по содержанию по вертикали */
     align-items: center;
     background-color: #e8f0fe; /* Светло-голубой фон как на скриншоте */
     border-radius: 16px; /* Закругленные углы */
