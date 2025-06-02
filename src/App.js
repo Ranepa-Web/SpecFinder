@@ -2,7 +2,7 @@
 import { Navigate, BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { useAuth, AuthProvider } from "./context/AuthContext"
 import { PROFILE_TYPES } from "./constants"
-import { useEffect } from "react"
+import React, { useEffect } from "react"
 import { initializeDatabase } from "./server/api"
 import Header from "./components/Header"
 import Footer from "./components/Footer"
@@ -40,10 +40,16 @@ const PrivateRoute = ({ children, allowedUserTypes = null }) => {
 const Layout = ({ children }) => {
   return (
     <div className="app-wrapper">
-      <Header />
-      <main className="main-content">{children}</main>
-      <Footer />
-      <BackToTop />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
+            integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7"
+            crossOrigin="anonymous"
+        />
+        <Header/>
+        <main className="main-content">{children}</main>
+        <Footer/>
+        <BackToTop/>
     </div>
   )
 }

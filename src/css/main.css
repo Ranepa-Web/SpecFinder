@@ -217,7 +217,7 @@ p {
 
 /* Формы */
 .form-control {
-  display: block;
+  display: flex !important;
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 1rem;

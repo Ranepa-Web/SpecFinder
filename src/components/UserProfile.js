@@ -35,6 +35,7 @@ function ApplicantProfile() {
     const [successMessage, setSuccessMessage] = useState("")
     const [errorMessage, setErrorMessage] = useState("")
     const [validationErrors, setValidationErrors] = useState({})
+    const [isResumePublished, setIsResumePublished] = useState(false)
 
     useEffect(() => {
         const vacancyId = parseInt(params.get("vacancyId"))
@@ -66,6 +67,10 @@ function ApplicantProfile() {
                     workExperiences: user.profile?.workExperiences || []
                 })
             }
+            // Проверяем, опубликовано ли резюме
+            const publishedResumes = JSON.parse(localStorage.getItem(`db_published_resumes`)) || []
+            const userResume = publishedResumes.find(resume => resume.userId === currentUser.id)
+            setIsResumePublished(!!userResume)
         } catch (error) {
             console.error("Ошибка при загрузке данных профиля:", error)
         } finally {
@@ -147,6 +152,87 @@ function ApplicantProfile() {
             }, 1200)
         } catch (error) {
             console.error("Ошибка при сохранении профиля:", error)
+        }
+    }
+
+    const handlePublishResume = () => {
+        try {
+            // Проверяем, что профиль заполнен достаточно для публикации резюме
+            if (!profileData.name || !profileData.position) {
+                setErrorMessage("Для публикации резюме необходимо заполнить имя и должность")
+                setTimeout(() => {
+                    setErrorMessage("")
+                }, 3200)
+                return
+            }
+
+            const publishedResumes = JSON.parse(localStorage.getItem(`db_published_resumes`)) || []
+
+            // Создаем объект резюме
+            const resume = {
+                id: Date.now(), // Простой ID на базе timestamp
+                userId: currentUser.id,
+                name: profileData.name,
+                email: profileData.email,
+                phone: profileData.phone,
+                city: profileData.city,
+                position: profileData.position,
+                experience: profileData.experience,
+                skills: profileData.skills,
+                about: profileData.about,
+                workExperiences: profileData.workExperiences,
+                publishedDate: new Date().toISOString(),
+                isActive: true
+            }
+
+            // Проверяем, есть ли уже опубликованное резюме этого пользователя
+            const existingResumeIndex = publishedResumes.findIndex(r => r.userId === currentUser.id)
+
+            if (existingResumeIndex !== -1) {
+                // Обновляем существующее резюме
+                publishedResumes[existingResumeIndex] = resume
+                setSuccessMessage("Резюме успешно обновлено в базе резюме")
+            } else {
+                // Добавляем новое резюме
+                publishedResumes.push(resume)
+                setSuccessMessage("Резюме успешно опубликовано в базе резюме")
+            }
+
+            localStorage.setItem(`db_published_resumes`, JSON.stringify(publishedResumes))
+            setIsResumePublished(true)
+
+            setTimeout(() => {
+                setSuccessMessage("")
+            }, 3000)
+
+        } catch (error) {
+            console.error("Ошибка при публикации резюме:", error)
+            setErrorMessage("Ошибка при публикации резюме")
+            setTimeout(() => {
+                setErrorMessage("")
+            }, 3200)
+        }
+    }
+
+    const handleUnpublishResume = () => {
+        try {
+            const publishedResumes = JSON.parse(localStorage.getItem(`db_published_resumes`)) || []
+            const updatedResumes = publishedResumes.filter(resume => resume.userId !== currentUser.id)
+
+            localStorage.setItem(`db_published_resumes`, JSON.stringify(updatedResumes))
+            setIsResumePublished(false)
+            setSuccessMessage("Резюме удалено из базы резюме")
+
+            setTimeout(() => {
+                setSuccessMessage("")
+            }, 3000)
+
+        } catch (error) {
+            console.error("Ошибка при удалении резюме:", error)
+            setErrorMessage("Ошибка при удалении резюме")
+            setTimeout(() => {
+                setErrorMessage("")
+            }, 3200)
         }
     }
 
@@ -302,6 +388,40 @@ function ApplicantProfile() {
                             <button className="button button_blue_m" onClick={handleSaveProfile}>
                                 Сохранить изменения
                             </button>
+                        </div>
+                        {/* Кнопки для управления резюме */}
+                        <div className="resume-actions" style={{marginTop: '15px'}}>
+                            {!isResumePublished ? (
+                                <button
+                                    className="btn btn-success"
+                                    onClick={handlePublishResume}
+                                >
+                                    Открыть резюме
+                                </button>
+                            ) : (
+                                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                    <button
+                                        className="btn btn-success"
+                                        type="button"
+                                        onClick={handlePublishResume}
+                                    >
+                                        Обновить резюме
+                                    </button>
+                                    <button
+                                        className="btn btn-danger"
+                                        type="button"
+                                        onClick={handleUnpublishResume}
+                                    >
+                                        Закрыть резюме
+                                    </button>
+                                </div>
+                            )}
+
+                            {isResumePublished && (
+                                <p style={{fontSize: '14px', color: '#666', marginTop: '10px'}}>
+                                    Ваше резюме доступно работодателям в базе резюме
+                                </p>
+                            )}
                         </div>
                     </div>)}
 
