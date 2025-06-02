@@ -430,11 +430,20 @@ function EmployerProfile() {
       if (profileData.phone && !isValidPhoneNumber(profileData.phone)) {
         errors.phone = 'Неверный формат номера телефона'
       } else {
-        validationErrors.phone = null
+        delete errors.phone
       }
 
+      if (!profileData.companyName?.trim()) {
+        errors.companyName = "Название компании обязательно для заполнения"
+      } else if (profileData.companyName.trim().length < 2) {
+        errors.companyName = "Название компании должно содержать минимум 2 символа"
+      } else {
+        delete errors.companyName
+      }
+
+      setValidationErrors(errors)
+
       if (Object.keys(errors).length > 0) {
-        setValidationErrors(errors)
         return
       }
 
@@ -535,7 +544,13 @@ function EmployerProfile() {
                           className="form-control"
                           value={profileData.companyName}
                           onChange={handleInputChange}
+                          required
                       />
+                      {validationErrors.companyName && (
+                          <div className="error-message">
+                            {validationErrors.companyName}
+                          </div>
+                      )}
                     </div>
                     <div className="form-group">
                       <label htmlFor="industry">Отрасль</label>
