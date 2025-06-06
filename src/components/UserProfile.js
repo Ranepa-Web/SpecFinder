@@ -27,7 +27,7 @@ function ApplicantProfile() {
         phone: "",
         city: "",
         position: "",
-        experience: "",
+        experience: 0,
         skills: [],
         about: "",
         workExperiences: []
@@ -99,10 +99,63 @@ function ApplicantProfile() {
     }
 
     const handleWorkExperienceChange = (workExperiences) => {
+        const totalYears = calculateTotalExperienceYears(workExperiences);
         setProfileData({
-            ...profileData, workExperiences
+            ...profileData,
+            workExperiences: workExperiences,
+            experience: totalYears,
         })
     }
+
+    const calculateTotalExperienceYears = (workExperiences) => {
+        if (!Array.isArray(workExperiences) || workExperiences.length === 0) {
+            return 0;
+        }
+
+        let totalMonths = 0;
+
+        workExperiences.forEach((job) => {
+            // Если какие-то поля отсутствуют — пропускаем этот элемент
+            if (
+                job.startYear == null ||
+                job.startMonth == null ||
+                job.endYear == null ||
+                job.endMonth == null
+            ) {
+                return;
+            }
+
+            // Приводим всё к числу
+            const sy = Number(job.startYear);
+            const sm = Number(job.startMonth);
+            const ey = Number(job.endYear);
+            const em = Number(job.endMonth);
+
+            // Проверяем, что даты корректны и end >= start
+            if (
+                isNaN(sy) ||
+                isNaN(sm) ||
+                isNaN(ey) ||
+                isNaN(em) ||
+                em < 1 ||
+                em > 12 ||
+                sm < 1 ||
+                sm > 12
+            ) {
+                return;
+            }
+            // Если дата окончания раньше даты начала — тоже пропустим
+            if (ey * 12 + em < sy * 12 + sm) {
+                return;
+            }
+
+            totalMonths += (ey - sy) * 12 + (em - sm);
+        });
+
+        // Переводим месяцы в годы, оставляем дробную часть:
+        const years = totalMonths / 12;
+        return years;
+    };
 
     const handleSaveProfile = () => {
         try {
@@ -344,22 +397,6 @@ function ApplicantProfile() {
                                         value={profileData.position}
                                         onChange={handleInputChange}
                                     />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="experience">Опыт работы</label>
-                                    <select
-                                        id="experience"
-                                        name="experience"
-                                        className="form-control"
-                                        value={profileData.experience}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">Выберите опыт работы</option>
-                                        <option value="no-experience">Нет опыта</option>
-                                        <option value="1-3">1-3 года</option>
-                                        <option value="3-5">3-5 лет</option>
-                                        <option value="5+">Более 5 лет</option>
-                                    </select>
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="skills">Навыки</label>

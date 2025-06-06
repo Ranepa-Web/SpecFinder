@@ -1,10 +1,10 @@
 "use client"
 
-import React, {useEffect, useState} from "react"
+import React, {useState} from "react"
 import WorkExperienceModal from "../modals/WorkExperienceModal"
 import "../../css/work_experience.css"
 
-function WorkExperienceSection({ workExperiences = [], onChange }) {
+function WorkExperienceSection({ workExperiences = [], onChange, readOnly = false}) {
     const [showModal, setShowModal] = useState(false)
     const [editingExperience, setEditingExperience] = useState(null)
 
@@ -87,12 +87,12 @@ function WorkExperienceSection({ workExperiences = [], onChange }) {
         <div className="profile-section work-experience-section">
             <div className="section-header">
                 <h4 className="profile-section-title">Опыт работы: {calculateTotalExperience(workExperiences)}</h4>
-                <button
+                {!readOnly && <button
                     className="button button_blue_m add-experience-btn"
                     onClick={handleAddExperience}
                 >
                     + Добавить
-                </button>
+                </button>}
             </div>
 
             {workExperiences.length === 0 ? (
@@ -130,12 +130,12 @@ function WorkExperienceSection({ workExperiences = [], onChange }) {
                                 )})
                                 </p>
                             </div>
-                            <button
+                            {!readOnly && <button
                                 className="edit-experience-btn"
                                 onClick={() => handleEditExperience(experience, index)}
                             >
                                 <span className="edit-icon">✎</span>
-                            </button>
+                            </button>}
                         </div>
                     )})}
                 </div>
