@@ -1,240 +1,387 @@
-"use client"
-
 // src/components/Search.js
-import { useState, useEffect, useMemo } from "react"
-import { LOCAL_STORAGE_KEYS } from "../constants"
-
-// Пример данных по умолчанию
-const defaultItems = [
-  { id: 1, name: "Иван Петров", price: 1500, rating: 4.8, isVerify: true, category: "Веб-разработка" },
-  { id: 2, name: "Анна Сидорова", price: 1200, rating: 4.5, isVerify: false, category: "Дизайн" },
-  { id: 3, name: "Сергей Кузнецов", price: 2000, rating: 4.9, isVerify: true, category: "Веб-разработка" },
-  { id: 4, name: "Мария Иванова", price: 1800, rating: 4.7, isVerify: true, category: "Копирайтинг" },
-  { id: 5, name: "Алексей Смирнов", price: null, rating: 4.2, isVerify: false, category: "Маркетинг" },
-  { id: 6, name: "Елена Волкова", price: 1650, rating: 5.0, isVerify: true, category: "Дизайн" },
-]
-
-// Инициализация localStorage при первом запуске
-const initializeItemsStorage = () => {
-  if (!localStorage.getItem(LOCAL_STORAGE_KEYS.SEARCH_ITEMS)) {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEYS.SEARCH_ITEMS, JSON.stringify(defaultItems))
-      console.log("LocalStorage для поиска инициализирован.")
-    } catch (error) {
-      console.error("Ошибка инициализации items в localStorage:", error)
-    }
-  }
-}
-
-// Добавляем проверку на существование массива appliedJobs в профиле пользователя
-const hasApplied = (vacancyId) => {
-  // Mock currentUser for demonstration. Replace with actual user data.
-  const currentUser = {
-    userType: "jobseeker",
-    profile: {
-      appliedJobs: [],
-    },
-  }
-  return (
-    currentUser &&
-    currentUser.userType === "jobseeker" &&
-    currentUser.profile &&
-    currentUser.profile.appliedJobs &&
-    currentUser.profile.appliedJobs.includes(vacancyId)
-  )
-}
+import React, { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
+import SkillsInput from "./forms/SkillsInput";
 
 const Search = () => {
-  const [items, setItems] = useState([]) // Все загруженные элементы
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState("")
-  const [verifiedOnly, setVerifiedOnly] = useState(false)
+  const [resumes, setResumes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Загрузка данных при монтировании компонента
+  // Состояния для поиска и фильтров
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+  const [selectedSkills, setSelectedSkills] = useState([]); // массив выбранных навыков
+  const [minExperience, setMinExperience] = useState("");     // минимальный опыт (лет)
+  const [maxExperience, setMaxExperience] = useState("");     // максимальный опыт (лет)
+  const [noExperience, setNoExperience] = useState(false);    // чекбокс «Без опыта»
+
+  const [selectedCity, setSelectedCity] = useState("");   // массив выбранных городов
+
+  // Загрузка резюме из localStorage
   useEffect(() => {
-    initializeItemsStorage()
-    console.log("Search.js: Загрузка из localStorage...")
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
-      const itemsJson = localStorage.getItem(LOCAL_STORAGE_KEYS.SEARCH_ITEMS)
-      const loadedItems = itemsJson ? JSON.parse(itemsJson) : []
-      setItems(loadedItems)
-      console.log(`Загружено ${loadedItems.length} элементов.`)
+      const resumesJson = localStorage.getItem("db_published_resumes");
+      const allResumes = resumesJson ? JSON.parse(resumesJson) : [];
+
+      const activeResumes = allResumes
+          .filter((r) => r.isActive)
+          .map((r) => {
+            return ({
+              ...r,
+              category: r.category ?? r.position ?? "Другое",
+              isVerify: r.isVerify ?? false,
+              // Предполагаем, что r.skills уже массив, а не строка
+              skills: Array.isArray(r.skills) ? r.skills : [],
+              city: r.city ?? "",
+            })
+          });
+
+      setResumes(activeResumes);
     } catch (err) {
-      console.error("Ошибка загрузки items из localStorage:", err)
-      setError("Не удалось загрузить список исполнителей.")
+      console.error("Ошибка загрузки резюме из localStorage:", err);
+      setError("Не удалось загрузить список резюме.");
     } finally {
-      setLoading(false) // Завершаем загрузку в любом случае
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
-  // Обработчик изменения поля поиска
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value)
-  }
+  // Обработчики инпутов
+  const handleSearchChange = (e) => setSearchQuery(e.target.value);
+  const handleCategoryChange = (e) => setCategoryFilter(e.target.value);
+  const handleVerifiedChange = (e) => setVerifiedOnly(e.target.checked);
 
-  // Обработчик изменения фильтра категории
-  const handleCategoryChange = (event) => {
-    setCategoryFilter(event.target.value)
-  }
+  const handleSkillsChange = (e) => setSelectedSkills(e.target.value);
 
-  // Обработчик изменения фильтра верификации
-  const handleVerifiedChange = (event) => {
-    setVerifiedOnly(event.target.checked)
-  }
+  const handleMinExpChange = (e) => setMinExperience(e.target.value);
+  const handleMaxExpChange = (e) => setMaxExperience(e.target.value);
+  const handleNoExpChange = (e) => setNoExperience(e.target.checked);
+  const handleSelectedCityChange = (e) => setSelectedCity(e.target.value);
 
-  // Сброс всех фильтров
   const resetFilters = () => {
-    setSearchQuery("")
-    setCategoryFilter("")
-    setVerifiedOnly(false)
-  }
+    setSearchQuery("");
+    setCategoryFilter("");
+    setVerifiedOnly(false);
+    setSelectedSkills([]);
+    setMinExperience("");
+    setMaxExperience("");
+    setNoExperience(false);
+    setSelectedCity("");
+  };
 
-  // Получение уникальных категорий для фильтра
+
+  // Уникальные наборы для фильтров
   const categories = useMemo(() => {
-    const uniqueCategories = new Set()
-    items.forEach((item) => {
-      if (item.category) {
-        uniqueCategories.add(item.category)
-      }
-    })
-    return Array.from(uniqueCategories)
-  }, [items])
+    const setCat = new Set();
+    resumes.forEach((r) => {
+      if (r.category) setCat.add(r.category);
+    });
+    return Array.from(setCat);
+  }, [resumes]);
 
-  // Фильтрация списка исполнителей
-  const filteredItems = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
-    const category = categoryFilter.trim()
+  const allCities = useMemo(() => {
+    const setCities = new Set();
+    resumes.forEach((r) => {
+      if (r.city && r.city.trim() !== "") setCities.add(r.city.trim());
+    });
+    return Array.from(setCities);
+  }, [resumes]);
 
-    return items.filter((item) => {
-      // Фильтр по поисковому запросу
-      const nameMatch = !query || (item.name && item.name.toLowerCase().includes(query))
+  // Основная фильтрация
+  const filteredResumes = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const cat = categoryFilter.trim();
+
+    // Преобразуем min/max опыта в числа или null
+    const minExpVal = minExperience === "" ? null : Number(minExperience);
+    const maxExpVal = maxExperience === "" ? null : Number(maxExperience);
+
+    return resumes.filter((r) => {
+      // Поиск по имени или должности
+      const nameMatch =
+          !query || (r.name && r.name.toLowerCase().includes(query));
+      const positionMatch =
+          !query || (r.position && r.position.toLowerCase().includes(query));
+      if (!nameMatch && !positionMatch) return false;
 
       // Фильтр по категории
-      const categoryMatch = !category || (item.category && item.category === category)
+      if (cat && r.category !== cat) return false;
 
       // Фильтр по верификации
-      const verifyMatch = !verifiedOnly || item.isVerify
+      if (verifiedOnly && !r.isVerify) return false;
 
-      return nameMatch && categoryMatch && verifyMatch
-    })
-  }, [items, searchQuery, categoryFilter, verifiedOnly])
+      // Фильтр по навыкам (тэгам)
+      if (selectedSkills.length > 0) {
+        // каждое выбранное skill должно содержаться в r.skills
+        const hasAllSkills = selectedSkills.every((skill) =>
+            r.skills.includes(skill)
+        );
+        if (!hasAllSkills) return false;
+      }
 
-  // Рендеринг Карточки Исполнителя
-  const renderItemCard = (item) => (
-    <div key={item.id} className="item_card">
-      <h3>{item.name || "Имя не указано"}</h3>
-      {item.price != null && <h3 className="blue">{item.price} руб.</h3>}
+      // Фильтр по опыту
+      if (noExperience) {
+        // показываем тех, у кого опыт null или 0
+        if (r.experience && r.experience > 0) return false;
+      } else {
+        if (minExpVal != null || maxExpVal != null) {
+          const expVal = r.experience == null ? 0 : r.experience;
+          console.log(expVal)
+          if (minExpVal != null && expVal < minExpVal) return false;
+          if (maxExpVal != null && expVal > maxExpVal) return false;
+        }
+      }
 
-      <div className="card_tags">
-        {item.rating != null && (
-          <div className="card_tag">
-            <h4>Рейтинг: {item.rating.toFixed(1)}</h4>
+      // Фильтр по городу
+      if (selectedCity.length > 0) {
+        if (!r.city?.toLowerCase().startsWith(selectedCity.toLowerCase())) return false;
+      }
+
+      return true;
+    });
+  }, [
+    resumes,
+    searchQuery,
+    categoryFilter,
+    verifiedOnly,
+    selectedSkills,
+    minExperience,
+    maxExperience,
+    noExperience,
+    selectedCity,
+  ]);
+
+  // Рендер карточки резюме
+  const renderResumeCard = (r) => (
+      <div key={r.id} className="card mb-4 shadow-sm">
+        <div className="card-body">
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <h4 className="card-title mb-0">
+                {r.name || "Имя не указано"}
+              </h4>
+              <h6 className="card-subtitle text-muted">
+                {r.position || "Должность не указана"}
+              </h6>
+            </div>
+            <div>
+              {r.isVerify ? (
+                  <span className="badge bg-success">Проверенный</span>
+              ) : (
+                  <span className="badge bg-secondary">Не проверен</span>
+              )}
+            </div>
           </div>
-        )}
-        <div className={`card_tag ${item.isVerify ? "verified" : "not-verified"}`}>
-          <h4>{item.isVerify ? "Проверенный" : "Не проверен"}</h4>
-        </div>
-      </div>
 
-      {item.category && (
-        <>
-          <h4>Категория</h4>
-          <p className="card_p">{item.category}</p>
-        </>
-      )}
+          <p className="mb-2">
+            <strong>Город:</strong> {r.city || "Не указан"}
+          </p>
+          <p className="mb-2">
+            <strong>Опыт:</strong>{" "}
+            {r.experience != null ? `${Math.floor(r.experience) } лет` : "Не указан"}
+          </p>
 
-      <div className="card_buttons">
-        <button type="button" className="button button_blue_m">
-          Смотреть резюме
-        </button>
-        <button type="button" className="button button_gray_m">
-          Контакты
-        </button>
-      </div>
-    </div>
-  )
-
-  return (
-    <div className="container">
-      <h1 className="search-title">Поиск специалистов</h1>
-      <div className="row">
-        {/* Блок Фильтров */}
-        <div className="col-lg-3">
-          <div className="base">
-            <h4>Фильтры</h4>
-
-            {/* Фильтр по категории */}
-            <div className="filter-group">
-              <label htmlFor="category-filter">Категория</label>
-              <select
-                id="category-filter"
-                className="form-control"
-                value={categoryFilter}
-                onChange={handleCategoryChange}
-              >
-                <option value="">Все категории</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
+          <div className="mb-2">
+            <strong>Навыки:</strong>
+            <div className="mt-1">
+              {r.skills.map((skill, idx) => (
+                  <span key={idx} className="badge bg-primary me-1 mb-1">
+                {skill}
+              </span>
+              ))}
             </div>
+          </div>
 
-            {/* Фильтр по верификации */}
-            <div className="filter-group checkbox-filter">
-              <label>
-                <input type="checkbox" checked={verifiedOnly} onChange={handleVerifiedChange} />
-                Только проверенные
-              </label>
-            </div>
+          <p className="mb-2">
+            <strong>О себе:</strong> {r.about || "Не указано"}
+          </p>
 
-            <button type="button" className="button button_blue_m w-100" onClick={resetFilters}>
-              Сбросить фильтры
+          <div className="d-flex justify-content-between mt-3">
+            <Link to={`/resume/${r.id}`} className="btn btn-primary">
+              Смотреть резюме
+            </Link>
+            <button type="button" className="btn btn-secondary">
+              Контакты
             </button>
           </div>
         </div>
+      </div>
+  );
 
-        {/* Блок Поиска и Результатов */}
-        <div className="col-lg-9">
-          {/* Поле ввода поиска */}
-          <div className="search_line">
-            <input
-              className="search_input"
-              type="search"
-              placeholder="Поиск по имени..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              aria-label="Поиск исполнителей"
-            />
+  return (
+      <div className="container mt-4">
+        <h1 className="mb-4">Поиск открытых резюме</h1>
+
+        <div className="row">
+          {/* Блок Фильтров */}
+          <div className="col-lg-3 mb-4">
+            <div className="card p-3">
+              <h4 className="mb-3">Фильтры</h4>
+
+              {/* Фильтр по категории */}
+              <div className="mb-3">
+                <label htmlFor="category-filter" className="form-label">
+                  Категория
+                </label>
+                <select
+                    id="category-filter"
+                    className="form-select"
+                    value={categoryFilter}
+                    onChange={handleCategoryChange}
+                >
+                  <option value="">Все категории</option>
+                  {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Фильтр по верификации */}
+              <div className="form-check mb-3">
+                <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="verified-only"
+                    checked={verifiedOnly}
+                    onChange={handleVerifiedChange}
+                />
+                <label className="form-check-label" htmlFor="verified-only">
+                  Только проверенные
+                </label>
+              </div>
+
+              <hr />
+
+              {/* Фильтр по навыкам (тэгам) */}
+              <div className="mb-3">
+                <strong>Навыки</strong>
+                <SkillsInput
+                    id="skills"
+                    name="skills"
+                    value={selectedSkills}
+                    onChange={handleSkillsChange}
+                    placeholder="React, Node.js, Figma..."
+                    autoAddNewSkills={true}
+                />
+              </div>
+
+              <hr />
+
+              {/* Фильтр по опыту */}
+              <div className="mb-3">
+                <strong>Опыт (лет)</strong>
+                <div className="mb-2">
+                  <label htmlFor="min-exp" className="form-label small">
+                    Мин
+                  </label>
+                  <input
+                      type="number"
+                      id="min-exp"
+                      className="form-control"
+                      placeholder="0"
+                      value={minExperience}
+                      onChange={handleMinExpChange}
+                      disabled={noExperience}
+                      min="0"
+                  />
+                </div>
+                <div className="mb-2">
+                  <label htmlFor="max-exp" className="form-label small">
+                    Макс
+                  </label>
+                  <input
+                      type="number"
+                      id="max-exp"
+                      className="form-control"
+                      placeholder="∞"
+                      value={maxExperience}
+                      onChange={handleMaxExpChange}
+                      disabled={noExperience}
+                      min="0"
+                  />
+                </div>
+                <div className="form-check">
+                  <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="no-exp"
+                      checked={noExperience}
+                      onChange={handleNoExpChange}
+                  />
+                  <label className="form-check-label" htmlFor="no-exp">
+                    Без опыта
+                  </label>
+                </div>
+              </div>
+
+              <hr />
+
+              {/* Фильтр по городу */}
+              <div className="mb-3">
+                <strong>Город</strong>
+                <input
+                    type="text"
+                    name="city"
+                    value={selectedCity}
+                    onChange={handleSelectedCityChange}
+                    className="form-control"
+                    placeholder="Введите город"
+                />
+              </div>
+
+              <button
+                  type="button"
+                  className="btn btn-outline-primary w-100 mt-2"
+                  onClick={resetFilters}
+              >
+                Сбросить фильтры
+              </button>
+            </div>
           </div>
 
-          {/* Отображение состояния загрузки */}
-          {loading && <div className="loading-indicator">Загрузка исполнителей</div>}
+          {/* Блок Поиска + Результатов */}
+          <div className="col-lg-9">
+            {/* Поле поиска */}
+            <div className="mb-4">
+              <input
+                  type="search"
+                  className="form-control"
+                  placeholder="Поиск по имени или должности..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  aria-label="Поиск резюме"
+              />
+            </div>
 
-          {/* Отображение ошибки */}
-          {error && <div className="alert alert-danger">{error}</div>}
+            {/* Loading/Error */}
+            {loading && <div className="alert alert-info">Загрузка резюме...</div>}
+            {error && <div className="alert alert-danger">{error}</div>}
 
-          {/* Отображение результатов или сообщения "не найдено" */}
-          {!loading &&
-            !error &&
-            (filteredItems.length > 0 ? (
-              <div className="specialists-grid">{filteredItems.map(renderItemCard)}</div>
-            ) : (
-              <div className="base" style={{ marginTop: "20px", textAlign: "center", color: "#555" }}>
-                <p>По вашему запросу ничего не найдено.</p>
-                <p style={{ fontSize: "0.9em", marginTop: "10px" }}>Попробуйте изменить запрос или сбросить фильтры.</p>
-              </div>
-            ))}
+            {/* Результаты */}
+            {!loading && !error && (
+                <>
+                  {filteredResumes.length > 0 ? (
+                      <div>{filteredResumes.map(renderResumeCard)}</div>
+                  ) : (
+                      <div className="alert alert-warning text-center">
+                        По вашему запросу ничего не найдено.
+                        <br />
+                        Попробуйте изменить запрос или сбросить фильтры.
+                      </div>
+                  )}
+                </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
+  );
+};
 
-export default Search
+export default Search;
